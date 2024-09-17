@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Share Instructions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #e0e0e0;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .example {
+            background-color: #292929;
+            padding: 12px;
+            border-left: 4px solid #4caf50;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        code {
+            background-color: transparent;
+            padding: 0;
+            color: inherit;
+            display: inline-block;
+            font-family: monospace;
+        }
+
+        .purple {
+            color: #9c27b0;
+        }
+
+        .red {
+            color: #f44336;
+        }
+
+        .green {
+            color: #4caf50;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 14px;
+            margin-top: 20px;
+            color: #bbbbbb;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Media Share Instructions</h1>
+        <p>Use bits to share YouTube videos on stream. Each bit you send plays the video for 1 second.</p>
+
+        <h2>How to Send:</h2>
+        <p>To play a video from the beginning, send a message like this:</p>
+        <div class="example">
+            <code><span class="purple">Cheer100</span> <span class="red">https://www.youtube.com/watch?v=dQw4w9WgXcQ</span></code>
+        </div>
+        <p>Plays the video from the start for 100 seconds.</p>
+
+        <p>To start at a specific time, send a message like this:</p>
+        <div class="example">
+            <code><span class="purple">Cheer100</span> <span class="red">https://youtu.be/dQw4w9WgXcQ</span> <span class="green">2:34</span></code>
+        </div>
+        <p>Starts the video at 2:34 and plays for 100 seconds from that point.</p>
+
+        <p>To play a specific portion, use the following format:</p>
+        <div class="example">
+            <code><span class="purple">Cheer100</span> <span class="red">https://www.youtube.com/shorts/lkCRPp7cnP8</span> <span class="green">2:34-2:35</span></code>
+        </div>
+        <p>This plays the section between 2:34 and 2:35 and loops until your bits run out (in this case, it repeats for 100 seconds).</p>
+
+        <footer>
+            <p>Thanks for supporting the stream! Reach out in chat for help.</p>
+        </footer>
+    </div>
+</body>
+
+</html>
