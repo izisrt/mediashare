@@ -117,6 +117,7 @@
         .tc-arrow-btn { width: 22px; height: 11px; padding: 0; display: flex; align-items: center; justify-content: center; background: var(--surface-hover); border: none; border-bottom: 1px solid var(--border); color: var(--text-muted); cursor: pointer; font-size: 0.55rem; line-height: 1; font-family: inherit; user-select: none; -webkit-user-select: none; }
         .tc-arrow-btn:last-child { border-bottom: none; }
         .tc-arrow-btn:hover { color: var(--text); background: var(--border); }
+        .page-footer { margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--text-muted); text-align: center; }
     </style>
 </head>
 <body>
@@ -133,7 +134,7 @@
 
         <div class="card">
             <div class="card-title">1. Paste video URL</div>
-            <input type="url" id="url-input" placeholder="https://youtube.com/watch?v=... or youtube.com/shorts/... or Twitch clip, TikTok, X/Twitter..." autocomplete="off">
+            <input type="url" id="url-input" placeholder="YouTube, Shorts, Twitch clip, TikTok, X/Twitter" autocomplete="off">
             <div style="margin-top: 0.5rem;"><span id="platform-badge" class="platform-badge platform-unknown" style="display:none;">—</span></div>
             <div class="price-row">
                 <div class="col-small">
@@ -181,11 +182,11 @@
                         <div class="ctrl-group">
                             <label>Speed</label>
                             <select id="speed-select">
-                                <option value="1">1x</option>
                                 <option value="0.25">0.25x</option>
                                 <option value="0.5">0.5x</option>
+                                <option value="1" selected>1x</option>
+                                <option value="1.5">1.5x</option>
                                 <option value="2">2x</option>
-                                <option value="3">3x</option>
                             </select>
                         </div>
                         <div class="ctrl-group">
@@ -237,11 +238,11 @@
                         <div class="ctrl-group">
                             <label>Speed</label>
                             <select id="speed-select-manual">
-                                <option value="1">1x</option>
                                 <option value="0.25">0.25x</option>
                                 <option value="0.5">0.5x</option>
+                                <option value="1" selected>1x</option>
+                                <option value="1.5">1.5x</option>
                                 <option value="2">2x</option>
-                                <option value="3">3x</option>
                             </select>
                         </div>
                         <div class="ctrl-group">
@@ -274,6 +275,8 @@
                 <button class="btn btn-primary" id="copy-twitch">Copy</button>
             </div>
         </div>
+
+        <p class="page-footer">Made with NICOTINE, BEER, THC and AI</p>
     </div>
 
     <div id="toast" class="toast" style="display:none;">Copied!</div>
@@ -315,6 +318,7 @@
         let playheadInterval = null;
         let loopJustTriggered = false;
         let seeking = false;
+        let lastPlayheadTime = 0;
 
         if (location.protocol === 'file:') {
             document.getElementById('file-banner').style.display = 'block';
@@ -446,7 +450,7 @@
         }
 
         function getClosestPlaybackRate(wanted) {
-            const rates = [0.25, 0.5, 1, 2];
+            const rates = [0.25, 0.5, 1, 1.5, 2];
             let best = 1;
             let bestDiff = Infinity;
             for (const r of rates) {
@@ -466,19 +470,24 @@
         function startPlayheadPolling() {
             if (playheadInterval) clearInterval(playheadInterval);
             playheadInterval = setInterval(() => {
+                if (seeking) return;
                 if (ytPlayer && ytPlayer.getCurrentTime) {
                     const t = ytPlayer.getCurrentTime();
-                    if (typeof t === 'number') updatePlayhead(t);
-                    if (t < outSec - 0.5) loopJustTriggered = false;
-                    if (ytPlayer.getPlayerState && ytPlayer.getPlayerState() === 1) {
-                        if (!loopJustTriggered && t >= outSec - 0.1) {
-                            loopJustTriggered = true;
-                            seekTo(inSec);
-                            applyPlaybackSpeed();
-                            setTimeout(() => {
-                                if (ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
-                            }, 50);
+                    if (typeof t === 'number') {
+                        updatePlayhead(t);
+                        if (ytPlayer.getPlayerState && ytPlayer.getPlayerState() === 1) {
+                            const wasInsideClip = lastPlayheadTime >= inSec - 0.1 && lastPlayheadTime < outSec - 0.1;
+                            if (wasInsideClip && !loopJustTriggered && t >= outSec - 0.1) {
+                                loopJustTriggered = true;
+                                seekTo(inSec);
+                                applyPlaybackSpeed();
+                                setTimeout(() => {
+                                    if (ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
+                                }, 50);
+                            }
+                            if (t < outSec - 0.5) loopJustTriggered = false;
                         }
+                        lastPlayheadTime = t;
                     }
                 }
             }, 100);
@@ -571,7 +580,12 @@
                 const rect = wrap.getBoundingClientRect();
                 const px = clientX(e) - rect.left;
                 const sec = pxToSec(px);
+                lastPlayheadTime = sec;
                 seekTo(sec);
+                if (ytPlayer && ytPlayer.playVideo) {
+                    loopJustTriggered = false;
+                    ytPlayer.playVideo();
+                }
             }
 
             wrap.addEventListener('mousedown', onWrapTap);
@@ -733,6 +747,12 @@
             duration = 0;
             currentVideoId = null;
             useYtTimeline = false;
+
+            // Reset speed and loops when URL changes (new link or cleared)
+            document.getElementById('speed-select').value = '1';
+            document.getElementById('speed-select-manual').value = '1';
+            document.getElementById('loop-input').value = '0';
+            document.getElementById('loop-input-manual').value = '0';
 
             if (!url) {
                 document.getElementById('start-timecode').value = '';
