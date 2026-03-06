@@ -59,9 +59,16 @@
         .trim-slider::-moz-range-thumb { width: 14px; height: 28px; background: var(--accent); cursor: ew-resize; border: none; border-radius: 2px; }
         .trim-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
         .output-section { margin-top: 1.5rem; }
-        .output-box { background: #000; border: 1px solid var(--border); border-radius: 2px; padding: 0.9rem 1rem; font-family: 'Share Tech Mono', 'JetBrains Mono', monospace; font-size: 1rem; word-break: break-all; margin-bottom: 0.75rem; }
+        .output-box { background: #000; border: 1px solid var(--border); border-radius: 2px; padding: 0.9rem 1rem; font-family: 'Share Tech Mono', 'JetBrains Mono', monospace; font-size: 1rem; word-break: break-word; overflow-wrap: break-word; margin-bottom: 0.75rem; }
         .output-with-copy { display: flex; align-items: center; gap: 0.75rem; }
         .output-with-copy .output-text { flex: 1; min-width: 0; }
+        @media (max-width: 480px) {
+            .output-with-copy.se-output-box { flex-wrap: wrap; }
+            .output-with-copy.se-output-box .output-text { flex: 1 1 100%; width: 100%; order: 0; margin-bottom: 0.5rem; }
+            .output-with-copy.se-output-box .se-price { order: 1; }
+            .output-with-copy.se-output-box .btn { order: 2; }
+            .output-with-copy.se-output-box .se-link { order: 3; }
+        }
         .output-with-copy .btn { flex-shrink: 0; padding: 0.4rem 0.8rem; font-size: 0.8rem; }
         .se-price { flex-shrink: 0; padding: 0.35rem 0.6rem; font-size: 1rem; background: #000; border: 1px solid var(--border); border-radius: 2px; margin-right: 0.5rem; color: var(--accent); }
         .output-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.35rem; }
@@ -255,7 +262,7 @@
         <div class="card output-section">
             <div class="card-title">3. Copy & paste</div>
             <div class="output-label">StreamElements (Put price in Amount field, paste message in Message field)</div>
-            <div class="output-box output-with-copy">
+            <div class="output-box output-with-copy se-output-box">
                 <span id="se-donation" class="se-price">$X.XX</span>
                 <span id="se-output" class="output-text">Paste your message in the tip form</span>
                 <button class="btn btn-secondary" id="copy-se">Copy</button>
