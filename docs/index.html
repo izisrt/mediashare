@@ -1,2 +1,929 @@
 <!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=clip-builder.html"><title>Redirect</title></head><body>Redirecting to <a href="clip-builder.html">Clip Builder</a>...</body></html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>Media Share Clip Builder – IZIDORE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --surface: #111;
+            --surface-hover: #1a1a1a;
+            --border: #222;
+            --text: #e0e0e0;
+            --text-muted: #888;
+            --accent: #00ff88;
+            --accent-hover: #33ffaa;
+            --success: #00ff88;
+            --warning: #ffaa00;
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Share Tech Mono', 'Courier New', monospace; background: var(--bg); color: var(--text); margin: 0; min-height: 100vh; letter-spacing: 0.02em; }
+        .container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+        .page-header { background: #000; padding: 0.5rem 1.5rem; margin: 0 0 0.5rem 0; border-bottom: 1px solid var(--border); }
+        .page-header .container { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        body > .container { padding-top: 0.5rem; }
+        .page-header h1 { font-size: 1.35rem; font-weight: 400; margin: 0 0 0.15rem 0; color: #fff; text-shadow: 0 0 8px rgba(0,255,136,0.4), 0 2px 4px rgba(0,0,0,0.8); }
+        .page-header .subtitle { margin: 0; font-size: 0.9rem; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+        h1 { font-size: 1.5rem; font-weight: 400; margin-bottom: 0.5rem; }
+        .subtitle { color: var(--text-muted); font-size: 1rem; margin-bottom: 2rem; }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .card-title { font-size: 1rem; font-weight: 400; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; }
+        .card-title::before { content: '> '; opacity: 0.7; }
+        label { display: block; font-size: 1rem; color: var(--text-muted); margin-bottom: 0.35rem; }
+        input[type="url"], input[type="text"], input[type="number"], select {
+            width: 100%; padding: 0.65rem 0.9rem; background: #000; border: 1px solid var(--border);
+            border-radius: 2px; color: var(--text); font-size: 1rem; font-family: 'Share Tech Mono', 'JetBrains Mono', monospace;
+        }
+        .price-row { display: grid; grid-template-columns: 160px 160px; gap: 1rem; margin-top: 1rem; align-items: start; }
+        @media (max-width: 360px) { .price-row { grid-template-columns: 1fr; } }
+        .price-row .col-small { min-width: 0; }
+        .price-row label { white-space: nowrap; }
+        .controls-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; }
+        .controls-row .ctrl-group { display: flex; align-items: center; gap: 0.5rem; }
+        .controls-row label { margin-bottom: 0; margin-right: 0.25rem; }
+        .controls-row select, .controls-row input[type="number"] { width: auto; min-width: 70px; padding: 0.5rem 0.6rem; }
+        input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(124,92,255,0.2); }
+        .row { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; margin-bottom: 1rem; }
+        .row .col { flex: 1; min-width: 140px; }
+        .row .col-fixed { width: 90px; flex-shrink: 0; }
+        .preview-wrap { position: relative; background: #000; border-radius: 2px; overflow: hidden; aspect-ratio: 16/9; margin-bottom: 1rem; border: 1px solid var(--border); }
+        .preview-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        .preview-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.9rem; }
+        .trim-bar { position: relative; height: 28px; background: var(--bg); border-radius: 6px; margin: 1rem 0; }
+        .trim-fill { position: absolute; top: 0; bottom: 0; background: linear-gradient(90deg, transparent, rgba(124,92,255,0.4)); border-radius: 6px; pointer-events: none; }
+        .trim-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 28px; background: transparent; position: absolute; top: 0; left: 0; }
+        .trim-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 28px; background: var(--accent); cursor: ew-resize; border-radius: 2px; }
+        .trim-slider::-moz-range-thumb { width: 14px; height: 28px; background: var(--accent); cursor: ew-resize; border: none; border-radius: 2px; }
+        .trim-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
+        .output-section { margin-top: 1.5rem; }
+        .output-box { background: #000; border: 1px solid var(--border); border-radius: 2px; padding: 0.9rem 1rem; font-family: 'Share Tech Mono', 'JetBrains Mono', monospace; font-size: 1rem; word-break: break-word; overflow-wrap: break-word; margin-bottom: 0.75rem; }
+        .output-with-copy { display: flex; align-items: center; gap: 0.75rem; }
+        .output-with-copy .output-text { flex: 1; min-width: 0; }
+        @media (max-width: 480px) {
+            .output-with-copy.se-output-box { flex-wrap: wrap; }
+            .output-with-copy.se-output-box .output-text { flex: 1 1 100%; width: 100%; order: 0; margin-bottom: 0.5rem; }
+            .output-with-copy.se-output-box .se-price { order: 1; }
+            .output-with-copy.se-output-box .btn { order: 2; }
+            .output-with-copy.se-output-box .se-link { order: 3; }
+        }
+        .output-with-copy .btn { flex-shrink: 0; padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+        .se-price { flex-shrink: 0; padding: 0.35rem 0.6rem; font-size: 1rem; background: #000; border: 1px solid var(--border); border-radius: 2px; margin-right: 0.5rem; color: var(--accent); }
+        .output-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.35rem; }
+        .btn { padding: 0.6rem 1.2rem; border-radius: 2px; font-weight: 400; font-size: 1rem; cursor: pointer; border: 1px solid var(--border); font-family: 'Share Tech Mono', monospace; transition: filter 0.15s; }
+        #play-pause-btn, #restart-btn { min-width: 6rem; }
+        .btn:hover { filter: brightness(1.1); }
+        .btn-primary { background: var(--accent); color: #000; border-color: var(--accent); }
+        .btn-secondary { background: var(--surface-hover); color: var(--text); }
+        .btn-success { background: var(--success); color: #000; border-color: var(--accent); }
+        .btn-row { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.75rem; }
+        .platform-badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+        .platform-youtube { background: rgba(255,0,0,0.2); color: #ff4444; }
+        .platform-twitch { background: rgba(145,70,255,0.2); color: #b366ff; }
+        .platform-tiktok { background: rgba(0,0,0,0.3); color: #00f2ea; }
+        .platform-twitter { background: rgba(29,161,242,0.2); color: #1da1f2; }
+        .platform-unknown { background: var(--border); color: var(--text-muted); }
+        .se-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--accent); text-decoration: none; font-weight: 500; margin-top: 0.5rem; }
+        .se-link:hover { color: var(--accent-hover); }
+        .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; padding: 0.75rem 1.25rem; background: var(--success); color: #000; border-radius: 8px; font-weight: 600; font-size: 0.9rem; z-index: 100; animation: fadeIn 0.2s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .banner { background: rgba(255,170,0,0.1); border: 1px solid var(--warning); border-radius: 2px; padding: 0.9rem 1rem; margin-bottom: 1.5rem; font-size: 1rem; }
+        .banner strong { color: var(--warning); }
+        .banner code { background: var(--bg); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.85em; }
+        .video-controls { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+        .controls-main { flex-wrap: wrap; }
+        .controls-options { gap: 1rem; margin-bottom: 1rem; }
+        .timeline-wrap { position: relative; height: 36px; background: #000; border: 1px solid var(--border); border-radius: 2px; margin: 0.5rem 0; user-select: none; overflow: visible; touch-action: none; }
+        .timeline-track { position: absolute; inset: 0; border-radius: 0; }
+        .timeline-fill { position: absolute; top: 0; bottom: 0; background: rgba(0,255,136,0.25); border-radius: 0; pointer-events: none; }
+        .timeline-handle { position: absolute; top: -2px; bottom: -2px; width: 12px; background: var(--accent); border-radius: 0; cursor: ew-resize; z-index: 2; box-shadow: 0 0 8px rgba(0,255,136,0.5); touch-action: none; }
+        .timeline-handle::before { content: ''; position: absolute; inset: -10px -4px; }
+        .timeline-handle:hover { background: var(--accent-hover); }
+        .timeline-handle.dragging { background: var(--accent-hover); }
+        .timeline-playhead { position: absolute; top: -4px; bottom: -4px; width: 3px; background: #fff; border-radius: 2px; pointer-events: none; z-index: 3; box-shadow: 0 0 4px rgba(0,0,0,0.5); }
+        .timeline-track { cursor: pointer; }
+        .timeline-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
+        .handle-tooltip { position: absolute; bottom: -26px; transform: translateX(-50%); background: #000; border: 1px solid var(--accent); border-radius: 2px; padding: 0.25rem 0.5rem; font-size: 1rem; font-family: 'Share Tech Mono', monospace; white-space: nowrap; z-index: 10; box-shadow: 0 0 12px rgba(0,255,136,0.3); pointer-events: none; color: var(--accent); }
+        .handle-tooltip::before { content: ''; position: absolute; top: -6px; left: 50%; transform: translateX(-50%); border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 6px solid var(--border); }
+        .handle-tooltip::after { content: ''; position: absolute; top: -5px; left: 50%; transform: translateX(-50%); border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 5px solid #000; }
+        .tc-input { width: 4rem; padding: 0.25rem 0.4rem; font-size: 1rem; font-family: 'Share Tech Mono', 'JetBrains Mono', monospace; background: #000; border: 1px solid var(--border); border-radius: 2px; color: var(--text); text-align: center; }
+        .tc-input[type="number"]::-webkit-inner-spin-button, .tc-input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        .tc-input[type="number"] { -moz-appearance: textfield; }
+        .tc-input:focus { outline: none; border-color: var(--accent); }
+        .tc-with-arrows { display: flex; align-items: center; gap: 0.25rem; }
+        .tc-arrows-stack { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 2px; overflow: hidden; }
+        .tc-arrow-btn { width: 22px; height: 11px; padding: 0; display: flex; align-items: center; justify-content: center; background: var(--surface-hover); border: none; border-bottom: 1px solid var(--border); color: var(--text-muted); cursor: pointer; font-size: 0.55rem; line-height: 1; font-family: inherit; user-select: none; -webkit-user-select: none; }
+        .tc-arrow-btn:last-child { border-bottom: none; }
+        .tc-arrow-btn:hover { color: var(--text); background: var(--border); }
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <div class="container">
+            <h1>Media Share Clip Builder</h1>
+            <p class="subtitle">Build the exact command to paste in StreamElements or Twitch chat. Trim, set speed, and copy.</p>
+        </div>
+    </div>
+    <div class="container">
+        <div id="file-banner" class="banner" style="display:none;">
+            <strong>Preview may not work</strong> — You opened this from a file. For YouTube and Twitch embeds to work, serve over HTTP. In terminal: <code>cd docs && python -m http.server 8080</code> then open <code>http://localhost:8080/</code>
+        </div>
+
+        <div class="card">
+            <div class="card-title">1. Paste video URL</div>
+            <input type="url" id="url-input" placeholder="https://youtube.com/watch?v=... or youtube.com/shorts/... or Twitch clip, TikTok, X/Twitter..." autocomplete="off">
+            <div style="margin-top: 0.5rem;"><span id="platform-badge" class="platform-badge platform-unknown" style="display:none;">—</span></div>
+            <div class="price-row">
+                <div class="col-small">
+                    <label>Bits per second</label>
+                    <input type="number" id="bits-price-input" min="0" step="0.01" value="0.01" placeholder="0.01" title="e.g. 0.01 = 1 bit per second">
+                </div>
+                <div class="col-small">
+                    <label>Donation $/second</label>
+                    <input type="number" id="donation-price-input" min="0" step="0.01" value="0.01" placeholder="0.01" title="e.g. 0.01 = 1 cent per second">
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="preview-card">
+            <div class="card-title">2. Trim & preview <span style="font-weight:400;color:var(--text-muted);font-size:0.75rem;">(hover video for YouTube controls)</span></div>
+            <div class="preview-wrap" id="preview-wrap">
+                <div class="preview-placeholder" id="preview-placeholder">Paste a URL to see preview</div>
+                <div id="preview-embed" style="display:none;"></div>
+            </div>
+            <div id="trim-section" style="display:none;">
+                <div id="yt-timeline-wrap" style="display:none;">
+                    <div class="video-controls controls-row controls-main">
+                        <button class="btn btn-secondary" id="play-pause-btn">Play</button>
+                        <button class="btn btn-secondary" id="restart-btn" title="Start from beginning of clip">Restart</button>
+                        <button class="btn btn-secondary" id="set-in-btn">Set In</button>
+                        <button class="btn btn-secondary" id="set-out-btn">Set Out</button>
+                        <span class="timeline-labels" style="margin:0;flex:1;align-items:center;gap:0.75rem;">
+                            <span>In: <div class="tc-with-arrows" style="display:inline-flex;">
+                                <input type="text" id="in-tc-input" class="tc-input" value="0:00" placeholder="0:00" title="M:SS format">
+                                <div class="tc-arrows-stack">
+                                    <button type="button" class="tc-arrow-btn" id="in-tc-up" title="+1 second">▲</button>
+                                    <button type="button" class="tc-arrow-btn" id="in-tc-down" title="-1 second">▼</button>
+                                </div>
+                            </div></span>
+                            <span>Out: <div class="tc-with-arrows" style="display:inline-flex;">
+                                <input type="text" id="out-tc-input" class="tc-input" value="0:00" placeholder="0:00" title="M:SS format">
+                                <div class="tc-arrows-stack">
+                                    <button type="button" class="tc-arrow-btn" id="out-tc-up" title="+1 second">▲</button>
+                                    <button type="button" class="tc-arrow-btn" id="out-tc-down" title="-1 second">▼</button>
+                                </div>
+                            </div></span>
+                        </span>
+                    </div>
+                    <div class="video-controls controls-row controls-options">
+                        <div class="ctrl-group">
+                            <label>Speed</label>
+                            <select id="speed-select">
+                                <option value="1">1x</option>
+                                <option value="0.25">0.25x</option>
+                                <option value="0.5">0.5x</option>
+                                <option value="2">2x</option>
+                                <option value="3">3x</option>
+                            </select>
+                        </div>
+                        <div class="ctrl-group">
+                            <label>Loop</label>
+                            <div class="tc-with-arrows">
+                                <input type="number" id="loop-input" min="0" value="0" placeholder="0" title="Extra plays for bits/donation. Preview always loops." class="tc-input" style="width:3.5rem;">
+                                <div class="tc-arrows-stack">
+                                    <button type="button" class="tc-arrow-btn" id="loop-input-up" title="+1">▲</button>
+                                    <button type="button" class="tc-arrow-btn" id="loop-input-down" title="-1">▼</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-wrap" id="timeline-wrap">
+                        <div class="timeline-track" id="timeline-track"></div>
+                        <div class="timeline-fill" id="timeline-fill"></div>
+                        <div class="timeline-playhead" id="timeline-playhead"></div>
+                        <div class="timeline-handle" id="in-handle" data-role="in"></div>
+                        <div class="timeline-handle" id="out-handle" data-role="out"></div>
+                        <div id="handle-tooltip" class="handle-tooltip" style="display:none;">0:00</div>
+                    </div>
+                    <div class="timeline-labels"><span>0:00</span><span id="duration-display">0:00</span></div>
+                </div>
+                <div id="manual-trim-wrap" style="display:none;">
+                    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem;">Set start and end timecodes (format: M:SS)</p>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                        <div>
+                            <label>Start (in)</label>
+                            <div class="tc-with-arrows">
+                                <input type="text" id="start-timecode" class="tc-input" placeholder="0:00" title="e.g. 1:30">
+                                <div class="tc-arrows-stack">
+                                    <button type="button" class="tc-arrow-btn" id="start-timecode-up" title="+1 second">▲</button>
+                                    <button type="button" class="tc-arrow-btn" id="start-timecode-down" title="-1 second">▼</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label>End (out)</label>
+                            <div class="tc-with-arrows">
+                                <input type="text" id="end-timecode" class="tc-input" placeholder="0:00" title="e.g. 2:45">
+                                <div class="tc-arrows-stack">
+                                    <button type="button" class="tc-arrow-btn" id="end-timecode-up" title="+1 second">▲</button>
+                                    <button type="button" class="tc-arrow-btn" id="end-timecode-down" title="-1 second">▼</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="video-controls controls-row controls-options">
+                        <div class="ctrl-group">
+                            <label>Speed</label>
+                            <select id="speed-select-manual">
+                                <option value="1">1x</option>
+                                <option value="0.25">0.25x</option>
+                                <option value="0.5">0.5x</option>
+                                <option value="2">2x</option>
+                                <option value="3">3x</option>
+                            </select>
+                        </div>
+                        <div class="ctrl-group">
+                            <label>Loop</label>
+                            <div class="tc-with-arrows">
+                                <input type="number" id="loop-input-manual" min="0" value="0" placeholder="0" title="Extra plays for bits/donation" class="tc-input" style="width:3.5rem;">
+                                <div class="tc-arrows-stack">
+                                    <button type="button" class="tc-arrow-btn" id="loop-input-manual-up" title="+1">▲</button>
+                                    <button type="button" class="tc-arrow-btn" id="loop-input-manual-down" title="-1">▼</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card output-section">
+            <div class="card-title">3. Copy & paste</div>
+            <div class="output-label">StreamElements (Put price in Amount field, paste message in Message field)</div>
+            <div class="output-box output-with-copy se-output-box">
+                <span id="se-donation" class="se-price">$X.XX</span>
+                <span id="se-output" class="output-text">Paste your message in the tip form</span>
+                <button class="btn btn-secondary" id="copy-se">Copy</button>
+                <a href="https://streamelements.com/izidore/tip" target="_blank" rel="noopener" class="btn btn-success" id="se-link">Open tip page →</a>
+            </div>
+            <div class="output-label" style="margin-top: 1rem;">Twitch (Paste this in chat)</div>
+            <div class="output-box output-with-copy">
+                <span id="twitch-output" class="output-text">CheerX &lt;url&gt; [speed]</span>
+                <button class="btn btn-primary" id="copy-twitch">Copy</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast" style="display:none;">Copied!</div>
+
+    <script>
+        const SE_TIP_URL = 'https://streamelements.com/izidore/tip';
+        // When clip builder is on GitHub Pages, set this to your server URL, e.g. 'https://your-server.example.com'
+        const CONFIG_BASE = '';
+        let platform = null;
+        let bitsPricePerSecond = 0.01;
+        let donationPricePerSecond = 0.01;
+
+        async function fetchClipConfig() {
+            if (location.protocol === 'file:') return;
+            const base = CONFIG_BASE || location.origin;
+            try {
+                const r = await fetch(base + '/api/clip-config', { cache: 'no-store' });
+                if (r.ok) {
+                    const d = await r.json();
+                    if (typeof d.bitsPricePerSecond === 'number') {
+                        bitsPricePerSecond = d.bitsPricePerSecond;
+                        const el = document.getElementById('bits-price-input');
+                        if (el) el.value = String(d.bitsPricePerSecond);
+                    }
+                    if (typeof d.donationPricePerSecond === 'number') {
+                        donationPricePerSecond = d.donationPricePerSecond;
+                        const el = document.getElementById('donation-price-input');
+                        if (el) el.value = String(d.donationPricePerSecond);
+                    }
+                    buildOutputs();
+                }
+            } catch (_) {}
+        }
+        let inSec = 0, outSec = 0;
+        let duration = 0;
+        let currentVideoId = null;
+        let ytPlayer = null;
+        let useYtTimeline = false;
+        let playheadInterval = null;
+        let loopJustTriggered = false;
+        let seeking = false;
+
+        if (location.protocol === 'file:') {
+            document.getElementById('file-banner').style.display = 'block';
+        }
+
+        function detectPlatform(url) {
+            if (!url) return null;
+            try {
+                const u = new URL(url);
+                const h = u.hostname.toLowerCase();
+                if (h.includes('youtube.com') || h.includes('youtu.be')) return 'youtube';
+                if (h.includes('twitch.tv') && (u.pathname.includes('/clip/') || u.pathname.includes('/videos/'))) return 'twitch';
+                if (h.includes('tiktok.com')) return 'tiktok';
+                if (h.includes('twitter.com') || h.includes('x.com')) return 'twitter';
+            } catch (_) {}
+            return null;
+        }
+
+        function secToTimecode(s) {
+            const m = Math.floor(s / 60);
+            const sec = Math.floor(s % 60);
+            return `${m}:${sec.toString().padStart(2,'0')}`;
+        }
+
+        function timecodeToSec(tc) {
+            const s = String(tc).trim();
+            const parts = s.match(/^(\d{1,2}):(\d{2})$/);
+            if (parts) return parseInt(parts[1],10) * 60 + parseInt(parts[2],10);
+            const secOnly = parseInt(s, 10);
+            if (!isNaN(secOnly) && secOnly >= 0) return secOnly;
+            return 0;
+        }
+
+        function getSpeed() {
+            const ytWrap = document.getElementById('yt-timeline-wrap');
+            const el = ytWrap && ytWrap.style.display !== 'none' ? document.getElementById('speed-select') : document.getElementById('speed-select-manual');
+            return parseFloat(el ? el.value : 1) || 1;
+        }
+        function getLoops() {
+            const ytWrap = document.getElementById('yt-timeline-wrap');
+            const el = ytWrap && ytWrap.style.display !== 'none' ? document.getElementById('loop-input') : document.getElementById('loop-input-manual');
+            return Math.max(0, parseInt(el ? el.value : 0, 10) || 0);
+        }
+
+        function buildOutputs() {
+            parseTimecodeInputs();
+            const url = document.getElementById('url-input').value.trim();
+            const speed = getSpeed();
+            const loops = getLoops();
+            const bitsPriceEl = document.getElementById('bits-price-input');
+            const donationPriceEl = document.getElementById('donation-price-input');
+            if (bitsPriceEl) bitsPricePerSecond = parseFloat(bitsPriceEl.value) || 0.01;
+            if (donationPriceEl) donationPricePerSecond = parseFloat(donationPriceEl.value) || 0.01;
+
+            const clipDuration = Math.max(0, outSec - inSec);
+            const totalSourceTime = clipDuration * (loops + 1);
+            const totalPlaybackTime = totalSourceTime / Math.max(0.1, speed);
+            const bits = Math.max(1, Math.round(totalPlaybackTime * bitsPricePerSecond / 0.01));
+            const donationAmount = Math.max(1, totalPlaybackTime * donationPricePerSecond);
+
+            if (!url) {
+                document.getElementById('twitch-output').textContent = 'CheerX <url> [speed]';
+                document.getElementById('se-output').textContent = 'Paste your message in the tip form';
+                document.getElementById('se-donation').textContent = '$X.XX';
+                return;
+            }
+
+            const startTc = secToTimecode(inSec);
+            const endTc = secToTimecode(outSec);
+            const speedStr = speed !== 1 ? `${speed}x` : '';
+
+            const isTrimmed = duration ? (inSec > 0.1 || outSec < duration - 0.1) : (outSec > inSec);
+
+            let twitchMsg = `Cheer${bits} ${url}`;
+            if (isTrimmed) {
+                if (outSec > inSec) twitchMsg += ` ${startTc}-${endTc}`;
+                else if (inSec > 0) twitchMsg += ` ${startTc}`;
+            }
+            if (speedStr) twitchMsg += ` ${speedStr}`;
+            document.getElementById('twitch-output').textContent = twitchMsg;
+
+            // StreamElements: url + optional "1:30-2:45" + optional "2x"
+            let seMsg = url;
+            if (isTrimmed) {
+                if (outSec > inSec) seMsg += ` ${startTc}-${endTc}`;
+                else if (inSec > 0) seMsg += ` ${startTc}`;
+            }
+            if (speedStr) seMsg += ` ${speedStr}`;
+
+            document.getElementById('se-output').textContent = seMsg;
+            document.getElementById('se-donation').textContent = '$' + donationAmount.toFixed(2);
+        }
+
+        function showToast() {
+            const t = document.getElementById('toast');
+            t.style.display = 'block';
+            clearTimeout(window._toastT);
+            window._toastT = setTimeout(() => { t.style.display = 'none'; }, 2000);
+        }
+
+        function parseTimecodeInputs() {
+            if (!useYtTimeline) {
+                const startVal = document.getElementById('start-timecode').value.trim();
+                const endVal = document.getElementById('end-timecode').value.trim();
+                inSec = startVal ? timecodeToSec(startVal) : 0;
+                outSec = endVal ? timecodeToSec(endVal) : 0;
+            }
+        }
+
+        function updateTimelineUI() {
+            if (!duration) return;
+            const inPct = (inSec / duration) * 100;
+            const outPct = (outSec / duration) * 100;
+            document.getElementById('in-handle').style.left = `calc(${inPct}% - 6px)`;
+            document.getElementById('out-handle').style.left = `calc(${outPct}% - 6px)`;
+            const fill = document.getElementById('timeline-fill');
+            fill.style.left = inPct + '%';
+            fill.style.width = (outPct - inPct) + '%';
+            const inInput = document.getElementById('in-tc-input');
+            const outInput = document.getElementById('out-tc-input');
+            if (inInput) inInput.value = secToTimecode(inSec);
+            if (outInput) outInput.value = secToTimecode(outSec);
+        }
+
+        function updatePlayhead(sec) {
+            if (!duration) return;
+            const pct = Math.min(100, Math.max(0, (sec / duration) * 100));
+            document.getElementById('timeline-playhead').style.left = `calc(${pct}% - 1.5px)`;
+        }
+
+        function getClosestPlaybackRate(wanted) {
+            const rates = [0.25, 0.5, 1, 2];
+            let best = 1;
+            let bestDiff = Infinity;
+            for (const r of rates) {
+                const d = Math.abs(r - wanted);
+                if (d < bestDiff) { bestDiff = d; best = r; }
+            }
+            return best;
+        }
+
+        function applyPlaybackSpeed() {
+            if (!ytPlayer || !ytPlayer.setPlaybackRate) return;
+            const speed = getSpeed();
+            const rate = getClosestPlaybackRate(speed);
+            try { ytPlayer.setPlaybackRate(rate); } catch (_) {}
+        }
+
+        function startPlayheadPolling() {
+            if (playheadInterval) clearInterval(playheadInterval);
+            playheadInterval = setInterval(() => {
+                if (ytPlayer && ytPlayer.getCurrentTime) {
+                    const t = ytPlayer.getCurrentTime();
+                    if (typeof t === 'number') updatePlayhead(t);
+                    if (t < outSec - 0.5) loopJustTriggered = false;
+                    if (ytPlayer.getPlayerState && ytPlayer.getPlayerState() === 1) {
+                        if (!loopJustTriggered && t >= outSec - 0.1) {
+                            loopJustTriggered = true;
+                            seekTo(inSec);
+                            applyPlaybackSpeed();
+                            setTimeout(() => {
+                                if (ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
+                            }, 50);
+                        }
+                    }
+                }
+            }, 100);
+        }
+
+        function stopPlayheadPolling() {
+            if (playheadInterval) { clearInterval(playheadInterval); playheadInterval = null; }
+        }
+
+        function seekTo(sec) {
+            if (ytPlayer && ytPlayer.seekTo) {
+                seeking = true;
+                ytPlayer.seekTo(sec, true);
+                setTimeout(() => { seeking = false; }, 400);
+            }
+        }
+
+        function setupTimelineDrag() {
+            const wrap = document.getElementById('timeline-wrap');
+            const inHandle = document.getElementById('in-handle');
+            const outHandle = document.getElementById('out-handle');
+
+            function pxToSec(px) {
+                const w = wrap.offsetWidth;
+                return Math.max(0, Math.min(duration, (px / w) * duration));
+            }
+
+            function clientX(e) {
+                if (e.touches && e.touches.length) return e.touches[0].clientX;
+                if (e.changedTouches && e.changedTouches.length) return e.changedTouches[0].clientX;
+                return e.clientX;
+            }
+
+            const tooltip = document.getElementById('handle-tooltip');
+
+            function onDrag(e, role) {
+                const rect = wrap.getBoundingClientRect();
+                const px = clientX(e) - rect.left;
+                const sec = pxToSec(px);
+                if (role === 'in') {
+                    inSec = sec;
+                    if (inSec >= outSec) outSec = Math.min(duration, inSec + 1);
+                } else {
+                    outSec = sec;
+                    if (outSec <= inSec) inSec = Math.max(0, outSec - 1);
+                }
+                updateTimelineUI();
+                buildOutputs();
+                seekTo(role === 'in' ? inSec : outSec);
+                if (tooltip) {
+                    tooltip.textContent = secToTimecode(role === 'in' ? inSec : outSec);
+                    const handle = role === 'in' ? inHandle : outHandle;
+                    tooltip.style.left = (handle.offsetLeft + handle.offsetWidth / 2) + 'px';
+                }
+            }
+
+            function startDrag(e, role) {
+                e.preventDefault();
+                e.stopPropagation();
+                const handle = role === 'in' ? inHandle : outHandle;
+                handle.classList.add('dragging');
+                if (tooltip) {
+                    tooltip.style.display = 'block';
+                    tooltip.textContent = secToTimecode(role === 'in' ? inSec : outSec);
+                    tooltip.style.left = (handle.offsetLeft + handle.offsetWidth / 2) + 'px';
+                }
+                const move = (ev) => {
+                    ev.preventDefault();
+                    onDrag(ev, role);
+                };
+                const up = (ev) => {
+                    handle.classList.remove('dragging');
+                    if (tooltip) tooltip.style.display = 'none';
+                    document.removeEventListener('mousemove', move);
+                    document.removeEventListener('mouseup', up);
+                    document.removeEventListener('touchmove', move, { passive: false });
+                    document.removeEventListener('touchend', up);
+                    document.removeEventListener('touchcancel', up);
+                };
+                document.addEventListener('mousemove', move);
+                document.addEventListener('mouseup', up);
+                document.addEventListener('touchmove', move, { passive: false });
+                document.addEventListener('touchend', up);
+                document.addEventListener('touchcancel', up);
+                onDrag(e, role);
+            }
+
+            function onWrapTap(e) {
+                if (e.target === inHandle || e.target === outHandle) return;
+                const rect = wrap.getBoundingClientRect();
+                const px = clientX(e) - rect.left;
+                const sec = pxToSec(px);
+                seekTo(sec);
+            }
+
+            wrap.addEventListener('mousedown', onWrapTap);
+            wrap.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                onWrapTap(e);
+            }, { passive: false });
+
+            inHandle.addEventListener('mousedown', (e) => startDrag(e, 'in'));
+            outHandle.addEventListener('mousedown', (e) => startDrag(e, 'out'));
+            inHandle.addEventListener('touchstart', (e) => startDrag(e, 'in'), { passive: false });
+            outHandle.addEventListener('touchstart', (e) => startDrag(e, 'out'), { passive: false });
+        }
+
+        function loadYouTube(videoId) {
+            currentVideoId = videoId;
+            const wrap = document.getElementById('preview-embed');
+            wrap.innerHTML = '';
+            wrap.style.display = 'block';
+            document.getElementById('preview-placeholder').style.display = 'none';
+            document.getElementById('trim-section').style.display = 'block';
+            document.getElementById('yt-timeline-wrap').style.display = 'none';
+            document.getElementById('manual-trim-wrap').style.display = 'none';
+
+            const div = document.createElement('div');
+            div.id = 'yt-player-div';
+            div.style.width = '100%';
+            div.style.height = '100%';
+            wrap.appendChild(div);
+
+            if (typeof YT === 'undefined') {
+                const tag = document.createElement('script');
+                tag.src = 'https://www.youtube.com/iframe_api';
+                document.head.appendChild(tag);
+                window.onYouTubeIframeAPIReady = () => initYT(videoId, div);
+            } else {
+                initYT(videoId, div);
+            }
+        }
+
+        function initYT(videoId, container) {
+            if (ytPlayer) { try { ytPlayer.destroy(); } catch(_){} ytPlayer = null; }
+            ytPlayer = new YT.Player(container, {
+                videoId,
+                width: '100%',
+                height: '100%',
+                playerVars: { autoplay: 0, controls: 1, modestbranding: 1 },
+                events: {
+                    onReady: (e) => {
+                        duration = e.target.getDuration();
+                        if (duration && !isNaN(duration)) {
+                            useYtTimeline = true;
+                            inSec = 0;
+                            outSec = duration;
+                            document.getElementById('yt-timeline-wrap').style.display = 'block';
+                            document.getElementById('duration-display').textContent = secToTimecode(duration);
+                            updateTimelineUI();
+                            updatePlayhead(e.target.getCurrentTime ? e.target.getCurrentTime() : 0);
+                            setupTimelineDrag();
+                            startPlayheadPolling();
+                        } else {
+                            useYtTimeline = false;
+                            document.getElementById('manual-trim-wrap').style.display = 'block';
+                            document.getElementById('start-timecode').value = inSec ? secToTimecode(inSec) : '';
+                            document.getElementById('end-timecode').value = outSec ? secToTimecode(outSec) : '';
+                        }
+                        applyPlaybackSpeed();
+                        buildOutputs();
+                    },
+                    onError: () => {
+                        stopPlayheadPolling();
+                        useYtTimeline = false;
+                        const wrap = document.getElementById('preview-embed');
+                        const div = document.getElementById('yt-player-div');
+                        if (div) {
+                            div.innerHTML = '';
+                            const iframe = document.createElement('iframe');
+                            iframe.src = `https://www.youtube-nocookie.com/embed/${currentVideoId}?start=${Math.floor(inSec)}`;
+                            iframe.style.width = '100%';
+                            iframe.style.height = '100%';
+                            iframe.style.border = 'none';
+                            iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+                            div.appendChild(iframe);
+                        }
+                        document.getElementById('manual-trim-wrap').style.display = 'block';
+                        document.getElementById('start-timecode').value = inSec ? secToTimecode(inSec) : '';
+                        document.getElementById('end-timecode').value = outSec ? secToTimecode(outSec) : '';
+                        buildOutputs();
+                    },
+                    onStateChange: (e) => {
+                        const btn = document.getElementById('play-pause-btn');
+                        if (e.data === 1) { seeking = false; btn.textContent = 'Pause'; }
+                        else if (e.data === 2 || e.data === 0 || e.data === 5) {
+                            if (!seeking) btn.textContent = 'Play';
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateYouTubeEmbed() {
+            if (useYtTimeline && ytPlayer) seekTo(inSec);
+        }
+
+        function loadEmbed(url, plat) {
+            const wrap = document.getElementById('preview-embed');
+            wrap.innerHTML = '';
+            document.getElementById('preview-placeholder').style.display = 'none';
+            wrap.style.display = 'block';
+
+            let embedUrl = '';
+            const parentHost = location.hostname || 'localhost';
+            if (plat === 'twitch') {
+                const m = url.match(/twitch\.tv\/[^/]+\/(?:clip|videos)\/([^/?]+)/);
+                if (m) embedUrl = `https://clips.twitch.tv/embed?clip=${m[1]}&parent=${encodeURIComponent(parentHost)}`;
+            } else if (plat === 'tiktok') {
+                const m = url.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/) || url.match(/tiktok\.com\/t\/([a-zA-Z0-9]+)/);
+                if (m) embedUrl = `https://www.tiktok.com/embed/v2/${m[1]}`;
+            } else if (plat === 'twitter') {
+                const m = url.match(/status\/(\d+)/);
+                if (m) embedUrl = `https://platform.x.com/embed/Tweet.html?id=${m[1]}&theme=dark`;
+            }
+
+            if (embedUrl) {
+                const iframe = document.createElement('iframe');
+                iframe.src = embedUrl;
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                iframe.style.border = 'none';
+                if (plat !== 'twitch') iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+                wrap.appendChild(iframe);
+            }
+            useYtTimeline = false;
+            document.getElementById('trim-section').style.display = 'block';
+            document.getElementById('yt-timeline-wrap').style.display = 'none';
+            document.getElementById('manual-trim-wrap').style.display = 'block';
+        }
+
+        function onUrlChange() {
+            const url = document.getElementById('url-input').value.trim();
+            platform = detectPlatform(url);
+            const badge = document.getElementById('platform-badge');
+            if (platform) {
+                badge.textContent = platform;
+                badge.className = 'platform-badge platform-' + platform;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+
+            document.getElementById('preview-placeholder').style.display = url ? 'none' : 'flex';
+            document.getElementById('preview-placeholder').textContent = url ? 'Loading...' : 'Paste a URL to see preview';
+            document.getElementById('preview-embed').style.display = 'none';
+            document.getElementById('preview-embed').innerHTML = '';
+            document.getElementById('trim-section').style.display = 'none';
+            stopPlayheadPolling();
+            inSec = 0;
+            outSec = 0;
+            duration = 0;
+            currentVideoId = null;
+            useYtTimeline = false;
+
+            if (!url) {
+                document.getElementById('start-timecode').value = '';
+                document.getElementById('end-timecode').value = '';
+                buildOutputs();
+                return;
+            }
+
+            if (platform === 'youtube') {
+                let vid = '';
+                try {
+                    const u = new URL(url);
+                    if (u.hostname.includes('youtu.be')) {
+                        vid = u.pathname.slice(1).split('/')[0];
+                        const t = u.searchParams.get('t');
+                        if (t) inSec = parseInt(t, 10) || 0;
+                    } else {
+                        vid = u.searchParams.get('v') || '';
+                        if (!vid && u.pathname.includes('/shorts/')) {
+                            const m = u.pathname.match(/\/shorts\/([^/?]+)/);
+                            if (m) vid = m[1];
+                        }
+                        const t = u.searchParams.get('t');
+                        if (t) inSec = parseInt(t, 10) || 0;
+                    }
+                } catch (_) {}
+                if (vid) {
+                    document.getElementById('start-timecode').value = inSec ? secToTimecode(inSec) : '';
+                    document.getElementById('end-timecode').value = '';
+                    loadYouTube(vid);
+                } else {
+                    document.getElementById('preview-placeholder').textContent = 'Invalid YouTube URL';
+                }
+            } else if (platform) {
+                document.getElementById('start-timecode').value = '';
+                document.getElementById('end-timecode').value = '';
+                loadEmbed(url, platform);
+            } else {
+                document.getElementById('preview-placeholder').textContent = 'Unsupported URL. Use YouTube, Twitch clip, TikTok, or X/Twitter.';
+            }
+            buildOutputs();
+        }
+
+        document.getElementById('url-input').addEventListener('input', () => onUrlChange());
+        document.getElementById('url-input').addEventListener('paste', () => setTimeout(onUrlChange, 10));
+
+        document.getElementById('start-timecode').addEventListener('input', () => { buildOutputs(); updateYouTubeEmbed(); });
+        document.getElementById('end-timecode').addEventListener('input', () => { buildOutputs(); updateYouTubeEmbed(); });
+
+        function nudgeManualTc(role, delta) {
+            const el = role === 'in' ? document.getElementById('start-timecode') : document.getElementById('end-timecode');
+            const sec = timecodeToSec(el.value) + delta;
+            const clamped = Math.max(0, sec);
+            el.value = secToTimecode(clamped);
+            buildOutputs();
+            updateYouTubeEmbed();
+        }
+        setupRepeatButton(document.getElementById('start-timecode-up'), () => nudgeManualTc('in', 1));
+        setupRepeatButton(document.getElementById('start-timecode-down'), () => nudgeManualTc('in', -1));
+        setupRepeatButton(document.getElementById('end-timecode-up'), () => nudgeManualTc('out', 1));
+        setupRepeatButton(document.getElementById('end-timecode-down'), () => nudgeManualTc('out', -1));
+
+        document.getElementById('play-pause-btn').addEventListener('click', () => {
+            if (!ytPlayer) return;
+            const state = ytPlayer.getPlayerState ? ytPlayer.getPlayerState() : -1;
+            if (state === 1) {
+                ytPlayer.pauseVideo();
+                document.getElementById('play-pause-btn').textContent = 'Play';
+            } else {
+                loopJustTriggered = false;
+                applyPlaybackSpeed();
+                ytPlayer.seekTo(inSec, true);
+                ytPlayer.playVideo();
+                document.getElementById('play-pause-btn').textContent = 'Pause';
+            }
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            if (!ytPlayer) return;
+            loopJustTriggered = false;
+            applyPlaybackSpeed();
+            seekTo(inSec);
+            ytPlayer.playVideo();
+            document.getElementById('play-pause-btn').textContent = 'Pause';
+        });
+
+        document.getElementById('set-in-btn').addEventListener('click', () => {
+            if (!ytPlayer || !ytPlayer.getCurrentTime) return;
+            const t = ytPlayer.getCurrentTime();
+            inSec = t;
+            if (inSec >= outSec) outSec = Math.min(duration, inSec + 1);
+            updateTimelineUI();
+            buildOutputs();
+        });
+
+        document.getElementById('set-out-btn').addEventListener('click', () => {
+            if (!ytPlayer || !ytPlayer.getCurrentTime) return;
+            const t = ytPlayer.getCurrentTime();
+            outSec = t;
+            if (outSec <= inSec) inSec = Math.max(0, outSec - 1);
+            updateTimelineUI();
+            buildOutputs();
+        });
+
+        function applyTcInput(role, delta) {
+            if (!duration) return;
+            const inEl = document.getElementById('in-tc-input');
+            const outEl = document.getElementById('out-tc-input');
+            if (role === 'in') {
+                const base = delta !== undefined ? inSec : timecodeToSec(inEl.value);
+                const newVal = base + (delta || 0);
+                inSec = Math.max(0, Math.min(duration, newVal));
+                if (inSec >= outSec) outSec = Math.min(duration, inSec + 1);
+                seekTo(inSec);
+            } else {
+                const base = delta !== undefined ? outSec : timecodeToSec(outEl.value);
+                const newVal = base + (delta || 0);
+                outSec = Math.max(0, Math.min(duration, newVal));
+                if (outSec <= inSec) inSec = Math.max(0, outSec - 1);
+                seekTo(outSec);
+            }
+            updateTimelineUI();
+            buildOutputs();
+        }
+
+        function setupRepeatButton(btn, action) {
+            let initialTimeout, repeatInterval;
+            function start(e) {
+                e.preventDefault();
+                action();
+                initialTimeout = setTimeout(() => {
+                    repeatInterval = setInterval(action, 100);
+                }, 500);
+            }
+            function stop() {
+                clearTimeout(initialTimeout);
+                clearInterval(repeatInterval);
+            }
+            btn.addEventListener('mousedown', start);
+            btn.addEventListener('mouseup', stop);
+            btn.addEventListener('mouseleave', stop);
+            btn.addEventListener('touchstart', (e) => start(e), { passive: false });
+            btn.addEventListener('touchend', stop);
+            btn.addEventListener('touchcancel', stop);
+        }
+
+        document.getElementById('in-tc-input').addEventListener('change', () => applyTcInput('in'));
+        document.getElementById('in-tc-input').addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowUp') { e.preventDefault(); applyTcInput('in', 1); }
+            else if (e.key === 'ArrowDown') { e.preventDefault(); applyTcInput('in', -1); }
+        });
+        setupRepeatButton(document.getElementById('in-tc-up'), () => applyTcInput('in', 1));
+        setupRepeatButton(document.getElementById('in-tc-down'), () => applyTcInput('in', -1));
+        document.getElementById('out-tc-input').addEventListener('change', () => applyTcInput('out'));
+        document.getElementById('out-tc-input').addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowUp') { e.preventDefault(); applyTcInput('out', 1); }
+            else if (e.key === 'ArrowDown') { e.preventDefault(); applyTcInput('out', -1); }
+        });
+        setupRepeatButton(document.getElementById('out-tc-up'), () => applyTcInput('out', 1));
+        setupRepeatButton(document.getElementById('out-tc-down'), () => applyTcInput('out', -1));
+
+        function nudgeLoop(id, delta) {
+            const el = document.getElementById(id);
+            const val = Math.max(0, (parseInt(el.value, 10) || 0) + delta);
+            el.value = String(val);
+            buildOutputs();
+        }
+        setupRepeatButton(document.getElementById('loop-input-up'), () => nudgeLoop('loop-input', 1));
+        setupRepeatButton(document.getElementById('loop-input-down'), () => nudgeLoop('loop-input', -1));
+        setupRepeatButton(document.getElementById('loop-input-manual-up'), () => nudgeLoop('loop-input-manual', 1));
+        setupRepeatButton(document.getElementById('loop-input-manual-down'), () => nudgeLoop('loop-input-manual', -1));
+
+        document.getElementById('speed-select').addEventListener('change', () => { buildOutputs(); applyPlaybackSpeed(); });
+        document.getElementById('loop-input').addEventListener('input', buildOutputs);
+        document.getElementById('speed-select-manual').addEventListener('change', buildOutputs);
+        document.getElementById('loop-input-manual').addEventListener('input', buildOutputs);
+        document.getElementById('bits-price-input').addEventListener('input', buildOutputs);
+        document.getElementById('donation-price-input').addEventListener('input', buildOutputs);
+
+        document.getElementById('copy-twitch').addEventListener('click', () => {
+            navigator.clipboard.writeText(document.getElementById('twitch-output').textContent);
+            showToast();
+        });
+        document.getElementById('copy-se').addEventListener('click', () => {
+            navigator.clipboard.writeText(document.getElementById('se-output').textContent);
+            showToast();
+        });
+
+        // Initial build and fetch live prices from server (when same-origin or CONFIG_BASE set)
+        buildOutputs();
+        fetchClipConfig();
+    </script>
+</body>
+</html>
