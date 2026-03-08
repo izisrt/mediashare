@@ -117,6 +117,11 @@
         .tc-arrow-btn { width: 22px; height: 11px; padding: 0; display: flex; align-items: center; justify-content: center; background: var(--surface-hover); border: none; border-bottom: 1px solid var(--border); color: var(--text-muted); cursor: pointer; font-size: 0.55rem; line-height: 1; font-family: inherit; user-select: none; -webkit-user-select: none; }
         .tc-arrow-btn:last-child { border-bottom: none; }
         .tc-arrow-btn:hover { color: var(--text); background: var(--border); }
+        .clip-checkbox { appearance: none; -webkit-appearance: none; width: 18px; height: 18px; background: #000; border: 1px solid var(--border); border-radius: 2px; cursor: pointer; margin: 0; vertical-align: middle; transition: border-color 0.15s, box-shadow 0.15s; }
+        .clip-checkbox:hover { border-color: var(--accent); }
+        .clip-checkbox:checked { background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M2 6 L5 9 L10 3'/%3E%3C/svg%3E") center/10px no-repeat; border-color: var(--accent); box-shadow: 0 0 8px rgba(0,255,136,0.4); }
+        .clip-checkbox-label { margin-bottom: 0; margin-left: 0.5rem; color: var(--text-muted); font-size: 1rem; cursor: pointer; vertical-align: middle; }
+        .clip-checkbox-label:hover { color: var(--text); }
         .page-footer { margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--text-muted); text-align: center; }
     </style>
 </head>
@@ -150,6 +155,9 @@
 
         <div class="card" id="preview-card">
             <div class="card-title">2. Trim & preview <span style="font-weight:400;color:var(--text-muted);font-size:0.75rem;">(hover video for YouTube controls)</span></div>
+            <div id="preview-unsupported-banner" class="banner" style="display:none;">
+                <strong>5x speed and bass boost</strong> — Not supported for preview. Will play as intended on stream!
+            </div>
             <div class="preview-wrap" id="preview-wrap">
                 <div class="preview-placeholder" id="preview-placeholder">Paste a URL to see preview</div>
                 <div id="preview-embed" style="display:none;"></div>
@@ -191,7 +199,7 @@
                             </select>
                         </div>
                         <div class="ctrl-group">
-                            <label>Loop</label>
+                            <label>Loops</label>
                             <div class="tc-with-arrows">
                                 <input type="number" id="loop-input" min="0" value="0" placeholder="0" title="Extra plays for bits/donation. Preview always loops." class="tc-input" style="width:3.5rem;">
                                 <div class="tc-arrows-stack">
@@ -199,6 +207,10 @@
                                     <button type="button" class="tc-arrow-btn" id="loop-input-down" title="-1">▼</button>
                                 </div>
                             </div>
+                        </div>
+                        <div class="ctrl-group" style="align-items:center;">
+                            <input type="checkbox" id="bass-boost-check" class="clip-checkbox" title="Bass boost + distortion">
+                            <label for="bass-boost-check" class="clip-checkbox-label">Bass boosted</label>
                         </div>
                     </div>
                     <div class="timeline-wrap" id="timeline-wrap">
@@ -248,7 +260,7 @@
                             </select>
                         </div>
                         <div class="ctrl-group">
-                            <label>Loop</label>
+                            <label>Loops</label>
                             <div class="tc-with-arrows">
                                 <input type="number" id="loop-input-manual" min="0" value="0" placeholder="0" title="Extra plays for bits/donation" class="tc-input" style="width:3.5rem;">
                                 <div class="tc-arrows-stack">
@@ -256,6 +268,10 @@
                                     <button type="button" class="tc-arrow-btn" id="loop-input-manual-down" title="-1">▼</button>
                                 </div>
                             </div>
+                        </div>
+                        <div class="ctrl-group" style="align-items:center;">
+                            <input type="checkbox" id="bass-boost-check-manual" class="clip-checkbox" title="Bass boost + distortion">
+                            <label for="bass-boost-check-manual" class="clip-checkbox-label">Bass boosted</label>
                         </div>
                     </div>
                 </div>
@@ -364,6 +380,19 @@
             const el = ytWrap && ytWrap.style.display !== 'none' ? document.getElementById('loop-input') : document.getElementById('loop-input-manual');
             return Math.max(0, parseInt(el ? el.value : 0, 10) || 0);
         }
+        function getBassBoost() {
+            const ytWrap = document.getElementById('yt-timeline-wrap');
+            const el = ytWrap && ytWrap.style.display !== 'none' ? document.getElementById('bass-boost-check') : document.getElementById('bass-boost-check-manual');
+            return el ? el.checked : false;
+        }
+        function updatePreviewWarning() {
+            const el = document.getElementById('preview-unsupported-banner');
+            if (!el) return;
+            const isYoutube = platform === 'youtube';
+            const speed5x = getSpeed() === 5;
+            const bassOn = getBassBoost();
+            el.style.display = (isYoutube && (speed5x || bassOn)) ? 'block' : 'none';
+        }
 
         function buildOutputs() {
             parseTimecodeInputs();
@@ -385,12 +414,14 @@
                 document.getElementById('twitch-output').textContent = 'CheerX <url> [speed]';
                 document.getElementById('se-output').textContent = 'Paste your message in the tip form';
                 document.getElementById('se-donation').textContent = '$X.XX';
+                updatePreviewWarning();
                 return;
             }
 
             const startTc = secToTimecode(inSec);
             const endTc = secToTimecode(outSec);
             const speedStr = speed !== 1 ? `${speed}x` : '';
+            const bassStr = getBassBoost() ? 'bass' : '';
 
             const isTrimmed = duration ? (inSec > 0.1 || outSec < duration - 0.1) : (outSec > inSec);
 
@@ -400,18 +431,21 @@
                 else if (inSec > 0) twitchMsg += ` ${startTc}`;
             }
             if (speedStr) twitchMsg += ` ${speedStr}`;
+            if (bassStr) twitchMsg += ` ${bassStr}`;
             document.getElementById('twitch-output').textContent = twitchMsg;
 
-            // StreamElements: url + optional "1:30-2:45" + optional "2x"
+            // StreamElements: url + optional "1:30-2:45" + optional "2x" + optional "bass"
             let seMsg = url;
             if (isTrimmed) {
                 if (outSec > inSec) seMsg += ` ${startTc}-${endTc}`;
                 else if (inSec > 0) seMsg += ` ${startTc}`;
             }
             if (speedStr) seMsg += ` ${speedStr}`;
+            if (bassStr) seMsg += ` ${bassStr}`;
 
             document.getElementById('se-output').textContent = seMsg;
             document.getElementById('se-donation').textContent = '$' + donationAmount.toFixed(2);
+            updatePreviewWarning();
         }
 
         function showToast() {
@@ -931,6 +965,14 @@
         document.getElementById('loop-input').addEventListener('input', buildOutputs);
         document.getElementById('speed-select-manual').addEventListener('change', buildOutputs);
         document.getElementById('loop-input-manual').addEventListener('input', buildOutputs);
+        document.getElementById('bass-boost-check').addEventListener('change', () => {
+            document.getElementById('bass-boost-check-manual').checked = document.getElementById('bass-boost-check').checked;
+            buildOutputs();
+        });
+        document.getElementById('bass-boost-check-manual').addEventListener('change', () => {
+            document.getElementById('bass-boost-check').checked = document.getElementById('bass-boost-check-manual').checked;
+            buildOutputs();
+        });
         document.getElementById('bits-price-input').addEventListener('input', buildOutputs);
         document.getElementById('donation-price-input').addEventListener('input', buildOutputs);
 
